@@ -13,7 +13,7 @@ You need to have python-2.7 and mysql installed on your machine.
 3.pip install -r requirements.txt <br />
 4.create database 
 ```mysql
-CREATE DATABASE instagram_clone
+CREATE DATABASE instagram_clone;
 ```
 
 Running the app:
