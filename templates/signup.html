@@ -1,0 +1,47 @@
+<link href="{{ url_for('static',filename='index.css') }}" rel="stylesheet" type="text/css">
+{% extends 'base.html' %}
+{% block title %}Sign Up{% endblock %}
+{% block active %}<a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a>{% endblock %}
+{% block nav_icon2 %}<a href="{{ url_for('views.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a>{% endblock %}
+{% block body %}
+<div class="form" style="margin-top: 8%;">
+    <div id="signup">
+          <h1>Sign Up for Free</h1>
+
+          <form action="/signup" method="post">
+
+          <div class="top-row">
+            <div class="field-wrap">
+              <label>Username<span class="req">*</span></label>
+              <input type="text" required autocomplete="off" name="username"/>
+            </div>
+          </div>
+
+          <div class="field-wrap">
+            <label>
+              Email Address<span class="req">*</span>
+            </label>
+            <input type="email"required autocomplete="off" name="email"/>
+          </div>
+
+          <div class="field-wrap">
+            <label>
+              Set A Password<span class="req">*</span>
+            </label>
+            <input type="password"required autocomplete="off" name="password"/>
+          </div>
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class=flashes>
+                {% for message in messages %}
+                <div>{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
+          <button type="submit" class="button button-block"/>Get Started</button>
+
+          </form>
+    </div>
+</div>
+{% endblock %}

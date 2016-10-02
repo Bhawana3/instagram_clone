@@ -33,10 +33,9 @@ db.session.commit()
 print "Tables created"
 
 CORS(app)
-"""
+
 def register_blueprints(app):
 	from .views import views
 	app.register_blueprint(views)
 
 register_blueprints(app)
-"""

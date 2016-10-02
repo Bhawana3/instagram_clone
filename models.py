@@ -18,6 +18,9 @@ class User(db.Model):
         self.email = email
         self.password = sha256_crypt.encrypt(password)
 
+        if profile_pic is None:
+            self.profile_pic = profile_pic
+
     def __repr__(self):
         return '<User %r>' % self.email
 
@@ -96,6 +99,9 @@ class Comments(db.Model):
 
         if timestamp is None:
             self.timestamp = datetime.utcnow()
+
+        if comment is None:
+            self.comment = comment
 
     def __repr__(self):
         return "comment %r" % self.comment

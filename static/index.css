@@ -1,0 +1,126 @@
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+html {
+	overflow-y: scroll;
+}
+
+body {
+  background:#FFFFFF;
+  font-family: 'Titillium Web', sans-serif;
+}
+
+#signup h1 , #login h1{
+  text-align:center;
+  color:#FFFFFF;
+  margin:0 0 40px;
+}
+
+a {
+    text-decoration: none;
+    color: #1ab188;
+    transition: .5s ease;
+}
+a:hover {
+    color: #1ab188;
+  }
+
+
+.form {
+  background:#13232f;
+  padding: 40px;
+  max-width:600px;
+  margin:40px auto;
+  border-radius:4px;
+  box-shadow:0 4px 10px 1px #13232f;
+  color: #FFFFFF;
+}
+
+.tab-content > div:last-child {
+  display:none;
+}
+
+
+label {
+    left: 13px;
+    color: #FFFFFF;
+    transition: all 0.25s ease;
+    -webkit-backface-visibility: hidden;
+    pointer-events: none;
+    font-size: 22px;
+}
+label .req {
+  	margin:2px;
+  	color:#1ab188;
+  }
+
+label.active {
+    transform: translateY(50px);
+    left: 2px;
+    font-size: 14px;
+}
+label .active  .req {
+    opacity:0;
+  }
+
+label.highlight {
+	color:#FFFFFF;
+}
+
+input{
+    color: #FFFFFF;
+    font-size: 22px;
+    display: block;
+    height: 55px;
+    width: 100%;
+    padding: 5px 10px;
+    background: transparent;
+    border: 1px solid #a0b3b0;
+    border-radius: 5px;
+    transition: border-color .25s ease, box-shadow .25s ease;
+}
+input:focus {
+    outline:0;
+    border-color:#6A77BD;
+  }
+
+.field-wrap {
+  position:relative;
+  margin-bottom:40px;
+}
+
+.flashes{
+    color:red;
+    font-family: "Comic Sans MS";
+    font-size: 16px;
+    padding-top:5px;
+    text-align: center;
+    }
+
+.button {
+    border: 0;
+    outline: none;
+    border-radius: 5px;
+    padding: 15px 0;
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    background: rgba(255, 255, 255, 0.86);
+    color: #13232F;
+    transition: all .5s ease;
+    -webkit-appearance: none;
+}
+
+button:focus {
+    background:#a0b3b0;
+  }
+button:hover{
+    background:rgba(255, 255, 255, 0.65);
+}
+
+.button-block {
+  display:block;
+  width:100%;
+}
