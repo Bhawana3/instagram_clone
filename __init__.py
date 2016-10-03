@@ -12,7 +12,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 app.secret_key = 'B0Zr98j/3yX R~XHH!jmN]LWX/,?RM'
 
-db_url = 'mysql://root:password@localhost/instagram_clone'
+db_url = 'mysql://root:qtos@localhost/instagram_clone'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True					# to suppress warning at startup

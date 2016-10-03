@@ -1,0 +1,129 @@
+<link href="{{ url_for('static',filename='profile.css') }}" rel="stylesheet" type="text/css">
+{% extends 'base.html' %}
+{% block title %}{{ username }}{% endblock %}
+{% block feed %}<a href="{{ url_for('views.feed') }}"><span class="glyphicon glyphicon-user"></span> Feed</a>{% endblock %}
+{% block profile %}<a href="#"><span class="glyphicon glyphicon-log-in"></span> Profile</a>{% endblock %}
+{% block share %}<a href="{{ url_for('views.share') }}">Share</a>{% endblock %}
+{% block logout %}<a href="{{ url_for('views.logout') }}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>{% endblock %}
+
+{% block body %}
+<div class="container" style="margin-top: 12%;">
+    <div class="image-box">
+        <div class="col-sm-2 col-xs-4 profile-pic">
+            <div>
+                {% if logged_in_user %}
+                    {% if profile_pic %}
+                    <img id="imgUpload" src="{{ profile_pic }}" alt="profile-pic" data-target="#upload" data-toggle="modal">
+                    {% else %}
+                    <img src="{{ url_for('static',filename='images/user3.svg') }}" alt="profile-pic" data-target="#upload" data-toggle="modal">
+                    {% endif %}
+                {% else %}
+                    {% if profile_pic %}
+                    <img id="imgUpload" src="{{ profile_pic }}" alt="profile-pic" >
+                    {% else %}
+                    <img src="{{ url_for('static',filename='images/user3.svg') }}" alt="profile-pic">
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-sm-9 col-xs-12 row-1">
+            <div class="name-box col-sm-12">
+                <div class="col-sm-4 col-xs-6 name">{{ username }}</div>
+                <div class="col-sm-2 col-xs-6">
+                    {% if logged_in_user %}
+                    <input type="button" class="btn btn-default" value="Edit Profile" userid = {{ uid }}>
+                    {% else %}
+                    <input type="button" class="btn btn-default" value="Follow" userid = {{ uid }}>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="likes-box col-sm-12">
+                <div class="col-sm-2 col-xs-12">{{ posts_count }} Post</div>
+                <div class="col-sm-2 col-xs-12">{{ followers }} Followers</div>
+                <div class="col-sm-2 col-xs-12">{{ following }} Following</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-8 col-xs-12 posts">
+        {% for post in posts %}
+        <div class="posts-images col-sm-2 col-xs-2">
+            <img src="{{ post }}" alt="post">
+        </div>
+        {%  endfor %}
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="upload" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <form id="upload-file" method="POST" enctype="multipart/form-data" >
+                    <h1 style="font-size: 30px;font-family: sans-serif;">Upload Profile Picture</h1>
+                    <div style="display: table-caption;">
+                        <input class="file" type=file name=photo onchange="readURL(this);" accept="image/*" style="margin-top: 10px;">
+                        <img id="upload-image" style="margin-top:10px;" />
+                        <div>
+                            <input class="upload" type=button value=Upload style="margin-top: 30px;">
+                        </div>
+                    </div>
+                    <p id="show" style="display:none;color:green;">Successful!!</p>
+                    <p id="failure" style="display:none;color:red;">Failure!!</p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function readURL(input) {
+    console.log("inside read url");
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $('#upload-image')
+                .attr('src', e.target.result)
+                .width(100)
+                .height(100);
+        };
+        reader.readAsDataURL(input.files[0]);
+        console.log('read url completed');
+    }
+};
+
+$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+    options.async = true;
+});
+
+$(document).ready(function(){
+    $('.upload').click(function(){
+        console.log('inside upload');
+         var form_data = new FormData($('#upload-file')[0]);
+         console.log(form_data);
+         $.ajax({
+             url:'/share',
+             type:'post',
+             data: form_data,
+             contentType: false,
+             cache: false,
+             processData: false,
+             async: false,
+             success: function(response) {
+                if(response["message"] === "success"){
+                    console.log('Success!');
+                    $('#show').show();
+                    setTimeout(function(){//
+                        location.reload(); // then reload the page.(3)
+                    });
+                 }
+                else{
+                    $('#failure').show();
+                    }
+             }
+         });
+    });
+});
+</script>
+
+{% endblock %}

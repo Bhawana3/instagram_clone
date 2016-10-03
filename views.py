@@ -1,11 +1,14 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session, jsonify
+import flask
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, jsonify, json
 from flask.views import MethodView
 from passlib.hash import sha256_crypt
 from instagram_clone import alchemy_session
 from utils import *
-from sqlalchemy import func
+from sqlalchemy import update
+from sqlalchemy.sql import and_,or_
 
 from .models import *
+from manage import os
 
 views = Blueprint("views", __name__, template_folder= "templates")
 
@@ -63,30 +66,108 @@ class LoginView(MethodView):
 
         # check for email and password combination
         flash('Logged in successfully')
-        print session['uid']
         return redirect(url_for('views.profile',uid=session['uid']))
+
 
 class ProfileView(MethodView):
 
-    """show number of followers ,following count, own posts count , edit profile option """
+    """show number of followers ,following count, own posts count , edit profile option ,
+        own posts """
+
+    """ if logged in user profile then show edit profile option
+
+            otherwise show followers/following option"""
 
     def get(self,uid):
 
         if 'uid' in session:
-            following = alchemy_session.query(func.count(Followers.id)).filter(Followers.to_id == session['uid']).scalar()
-            followers = alchemy_session.query(func.count(Followers.id)).filter(Followers.from_id == session['uid']).scalar()
-            posts = alchemy_session.query(func.count(Photo_details.id)).filter(Photo_details.user_id == session['uid']).scalar()
 
-            return jsonify({'followers':followers, 'following':following, 'posts':posts})
+            following = []
+            followers = []
+            try:
+                user_detail = alchemy_session.query(User.username, User.profile_pic).filter(User.id == uid).first()
+                print user_detail
+                username = user_detail[0]
+                profile_pic = user_detail[1]
+                print profile_pic
+
+            except Exception as e:
+                print "Database quering error"
+
+            try:
+                results = alchemy_session.query(Followers.to_id,Followers.from_id).filter(or_(Followers.from_id == uid, Followers.to_id == uid)).all()
+
+            except Exception as e:
+                print "Database quering error"
+
+            for result in results:
+                print type(result[0])
+                if str(result[0]) == str(uid):
+                    following.append(result[1])
+                else:
+                    followers.append(result[0])
+            try:
+                posts = alchemy_session.query(Photo_details.photo_path).filter(Photo_details.user_id == uid).all()
+
+            except Exception as e:
+                print "Database quering error"
+
+            if str(uid) == str(session['uid']):
+                uid = str(session['uid'])
+                logged_in_user = True
+            else:
+                uid = str(uid)
+                logged_in_user = False
+
+            return render_template('profile.html', followers=len(followers), following=len(following),
+                                   posts_count=len(posts), posts=posts, username=username, profile_pic=profile_pic ,
+                                   uid=uid, logged_in_user = logged_in_user)
 
         else:
             return redirect(url_for('views.login'))
 
 
 class SharePhotoView(MethodView):
+
     def post(self):
+        print "Inside share photo view"
+        # For uploading photo
+        folder = 'static/uploads'
+        allowed_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.JPG']
+
         # upload and share photo with people
-        return redirect(url_for('views.feed'))
+        if 'uid' in session:
+            logged_in_user_id = session['uid']
+            try:
+                if request.method == 'POST':
+                    file = request.files['photo']
+                    extension = os.path.splitext(file.filename)[1]
+                    if extension in allowed_extensions:
+                        filename = str(logged_in_user_id) + extension  # filename should be uid + extension
+                        file.save(os.path.join(folder, filename))
+                        print "Image uploaded:", filename
+                        image_path = 'static/uploads/' + filename
+
+                        # update user model with profile pic details
+                        logged_in_user_details = User.query.filter_by(id = logged_in_user_id).first()
+                        print logged_in_user_details
+                        logged_in_user_details.profile_pic = image_path
+                        db.session.commit()
+
+                        respStr = json.dumps({'message': 'success'})
+                        resp = flask.Response(respStr)
+                        resp.headers['Content-Type'] = 'application/json'
+                        return resp
+                    else:
+                        respStr = json.dumps({'message': 'failure'})
+                        resp = flask.Response(respStr)
+                        resp.headers['Content-Type'] = 'application/json'
+                        return resp
+                        print "error: image format should be png,jpg,jpeg,gif"
+                else:
+                    return redirect(url_for('views.profile', uid=logged_in_user_id))
+            except Exception as e:
+                print e
 
 class FeedView(MethodView):
     def get(self):
@@ -94,10 +175,19 @@ class FeedView(MethodView):
         return render_template('feed.html')
 
 class DiscoverPeopleView(MethodView):
+    """code for discovering people,
+     show users which are not followed by logged in user"""
+
     def get(self):
-        # code for discover people
-        # show users which are not followed by logged in user
-        return render_template('discover.html')
+        users = []
+        if 'uid' in session:
+            # wrong query
+
+            all_users_except_followed = alchemy_session.query(User).filter(User.id == alchemy_session.query(Followers.from_id).filter(Followers.from_id != session['uid'])).all()
+            print all_users_except_followed
+            for user in all_users_except_followed:
+                users.append(user.username)
+            return jsonify('data',users)
 
 class LogoutView(MethodView):
     def get(self):
@@ -109,7 +199,7 @@ class LogoutView(MethodView):
 
 
 # Register the urls
-views.add_url_rule('/', view_func=IndexView.as_view('feed'), methods=['GET','POST'])
+views.add_url_rule('/', view_func=FeedView.as_view('feed'), methods=['GET','POST'])
 views.add_url_rule('/signup', view_func=SignupView.as_view('signup'),methods=['GET','POST'])
 views.add_url_rule('/login', view_func=LoginView.as_view('login'),methods=['GET','POST'])
 views.add_url_rule('/discover', view_func=DiscoverPeopleView.as_view('discover'), methods=['GET','POST'])

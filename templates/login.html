@@ -1,8 +1,8 @@
 <link href="{{ url_for('static',filename='index.css') }}" rel="stylesheet" type="text/css">
 {% extends 'base.html' %}
 {% block title %}Login{% endblock %}
-{% block nav_icon1 %}<a href="{{ url_for('views.signup') }}"><span class="glyphicon glyphicon-user"></span> Sign Up</a>{% endblock %}
-{% block active %}<a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a>{% endblock %}
+{% block feed %}<a href="{{ url_for('views.signup') }}"><span class="glyphicon glyphicon-user"></span> Sign Up</a>{% endblock %}
+{% block profile %}<a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a>{% endblock %}
 {% block body %}
 
 <div class="form" style="margin-top: 8%;">
