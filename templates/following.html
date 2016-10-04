@@ -1,0 +1,8 @@
+{% if followings %}
+    {% for following in followings %}
+        <div><a href="{{ url_for('views.profile', uid=userid) }}">{{ following.username }}</a></div>
+        <div>{{ following.profile_pic }}</div>
+    {% endfor %}
+{% else %}
+    <div>You haven't followed anyone yet.</div>
+{% endif %}

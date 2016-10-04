@@ -1,3 +1,7 @@
+a {
+    color: black;
+}
+
 .profile-pic img{
     width: 180px;
     height: 180px;
@@ -28,3 +32,50 @@
 .likes-box{
     font-size: 17px;
 }
+
+.likes-box >div{
+    cursor: pointer;
+}
+
+.posts{
+    margin-top: 10%;
+    //border: solid 1px #CCCCCC;
+}
+
+.posts-images img ,
+.add-button img {
+    width: 30%;
+    margin-top: 40%;
+    margin-left: 35%;
+}
+
+.posts-images, .add-button {
+    border: solid 1px #CCCCCC;
+    //padding-bottom: 8%;
+    height: 190px;
+    cursor: pointer;
+}
+
+.nopadding{
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.hidden-div {
+    display: none;
+    color: black;
+    padding-left: 30%;
+    padding-top: 3%;
+}
+
+.add:hover + .hidden-div, #imgUpload:hover + .hidden-div {
+    display: block;
+}
+
+/* Followers Modal */
+#followers{
+    border-bottom: solid 1px #CCCCCC;
+}
+

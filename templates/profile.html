@@ -2,8 +2,9 @@
 {% extends 'base.html' %}
 {% block title %}{{ username }}{% endblock %}
 {% block feed %}<a href="{{ url_for('views.feed') }}"><span class="glyphicon glyphicon-user"></span> Feed</a>{% endblock %}
-{% block profile %}<a href="#"><span class="glyphicon glyphicon-log-in"></span> Profile</a>{% endblock %}
+{% block profile %}<a href="{{ url_for('views.profile', uid=session['uid']) }}"><span class="glyphicon glyphicon-log-in"></span> Profile</a>{% endblock %}
 {% block share %}<a href="{{ url_for('views.share') }}">Share</a>{% endblock %}
+{% block discover %}<a href="{{ url_for('views.discover') }}">Discover</a>{% endblock %}
 {% block logout %}<a href="{{ url_for('views.logout') }}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>{% endblock %}
 
 {% block body %}
@@ -14,12 +15,13 @@
                 {% if logged_in_user %}
                     {% if profile_pic %}
                     <img id="imgUpload" src="{{ profile_pic }}" alt="profile-pic" data-target="#upload" data-toggle="modal">
+                    <div class="hidden-div">Change profile picture</div>
                     {% else %}
                     <img src="{{ url_for('static',filename='images/user3.svg') }}" alt="profile-pic" data-target="#upload" data-toggle="modal">
                     {% endif %}
                 {% else %}
                     {% if profile_pic %}
-                    <img id="imgUpload" src="{{ profile_pic }}" alt="profile-pic" >
+                    <img src="{{ profile_pic }}" alt="profile-pic" >
                     {% else %}
                     <img src="{{ url_for('static',filename='images/user3.svg') }}" alt="profile-pic">
                     {% endif %}
@@ -39,21 +41,31 @@
             </div>
             <div class="likes-box col-sm-12">
                 <div class="col-sm-2 col-xs-12">{{ posts_count }} Post</div>
-                <div class="col-sm-2 col-xs-12">{{ followers }} Followers</div>
-                <div class="col-sm-2 col-xs-12">{{ following }} Following</div>
+                <div class="col-sm-2 col-xs-12">
+                    <a class="followers" href="{{ url_for('views.followers', uid=uid) }}">{{ followers }} Followers</a>
+                </div>
+                <div class="col-sm-2 col-xs-12">
+                    <a class="following" href="{{ url_for('views.following', uid=uid) }}">{{ following }} Following</a>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-sm-8 col-xs-12 posts">
+    <div class="col-sm-9 col-xs-12 posts">
         {% for post in posts %}
-        <div class="posts-images col-sm-2 col-xs-2">
+        <div class="posts-images col-sm-3 col-xs-4 nopadding">
             <img src="{{ post }}" alt="post">
         </div>
         {%  endfor %}
+        {% if logged_in_user %}
+        <div class="add-button col-sm-3 col-xs-4 nopadding">
+            <img class="add" src="/static/images/add-button.svg" alt="add photo" data-target="#upload" data-toggle="modal">
+            <div class="hidden-div">Share photo</div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Upload profile pic Modal -->
 <div id="upload" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <!-- Modal content-->
@@ -76,6 +88,26 @@
         </div>
     </div>
 </div>
+
+<!-------Followers/Following modal------->
+
+ <div id="followers" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h5>Followers</h5>
+                <!--Show list of all the followers/followings of user -->
+                <div class="row">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- script ----->
 <script>
 function readURL(input) {
     console.log("inside read url");

@@ -4,6 +4,7 @@ from flask.views import MethodView
 from passlib.hash import sha256_crypt
 from instagram_clone import alchemy_session
 from utils import *
+
 from sqlalchemy import update
 from sqlalchemy.sql import and_,or_
 
@@ -23,9 +24,9 @@ class SignupView(MethodView):
 
     def post(self):
         user = User(
-            username = request.values.get('username'),
-            email = request.values.get('email'),
-            password = request.values.get('password')
+            username=request.values.get('username'),
+            email=request.values.get('email'),
+            password=request.values.get('password')
             )
         try:
             user.save()
@@ -35,9 +36,9 @@ class SignupView(MethodView):
             return redirect(url_for('views.signup'))
         flash('User successfully registered')
 
-        logged_in = perform_login (user.id, request.values.get('email'), request.values.get('username'))
+        logged_in = perform_login(user.id, request.values.get('email'), request.values.get('username'))
 
-        return redirect(url_for('views.index'))
+        return redirect(url_for('views.profile', uid=user.id))
 
 
 class LoginView(MethodView):
@@ -58,7 +59,7 @@ class LoginView(MethodView):
         else:
             if sha256_crypt.verify(password, registered_user.password):
 
-                logged_in = perform_login (registered_user.id, registered_user.email, registered_user.username)
+                logged_in = perform_login(registered_user.id, registered_user.email, registered_user.username)
 
             else:
                 flash('Invalid Credentials !!')
@@ -103,9 +104,9 @@ class ProfileView(MethodView):
             for result in results:
                 print type(result[0])
                 if str(result[0]) == str(uid):
-                    following.append(result[1])
+                    followers.append(result[1])
                 else:
-                    followers.append(result[0])
+                    following.append(result[0])
             try:
                 posts = alchemy_session.query(Photo_details.photo_path).filter(Photo_details.user_id == uid).all()
 
@@ -121,7 +122,7 @@ class ProfileView(MethodView):
 
             return render_template('profile.html', followers=len(followers), following=len(following),
                                    posts_count=len(posts), posts=posts, username=username, profile_pic=profile_pic ,
-                                   uid=uid, logged_in_user = logged_in_user)
+                                   uid=uid, logged_in_user=logged_in_user)
 
         else:
             return redirect(url_for('views.login'))
@@ -169,6 +170,25 @@ class SharePhotoView(MethodView):
             except Exception as e:
                 print e
 
+class FollowingView(MethodView):
+    def get(self,uid):
+        if 'uid' in session:
+            try:
+                following = alchemy_session.query(User.username,User.profile_pic).join(Followers, User.id == Followers.to_id).filter(Followers.from_id == uid).all()
+
+            except Exception as e:
+                print "Database quering error"
+            return render_template('following.html', followings=following)
+
+class FollowersView(MethodView):
+    def get(self,uid):
+        if 'uid' in session:
+            try:
+                followers = alchemy_session.query(User.username,User.profile_pic).join(Followers, User.id == Followers.from_id).filter(Followers.to_id == uid).all()
+            except Exception as e:
+                print "Database quering error"
+            return render_template('followers.html',followers=followers)
+
 class FeedView(MethodView):
     def get(self):
         # show own feed and all the updates of followed people
@@ -181,12 +201,16 @@ class DiscoverPeopleView(MethodView):
     def get(self):
         users = []
         if 'uid' in session:
-            # wrong query
+            logged_in_user_id = session['uid']
+            print type(logged_in_user_id)
 
-            all_users_except_followed = alchemy_session.query(User).filter(User.id == alchemy_session.query(Followers.from_id).filter(Followers.from_id != session['uid'])).all()
+            # wrong query
+            subquery = alchemy_session.query(Followers.to_id).filter(Followers.from_id != logged_in_user_id).group_by(Followers.to_id)
+            print subquery
+            all_users_except_followed = alchemy_session.query(User).filter(~User.id.in_(subquery))
             print all_users_except_followed
             for user in all_users_except_followed:
-                users.append(user.username)
+                users.append(user.id)
             return jsonify('data',users)
 
 class LogoutView(MethodView):
@@ -205,4 +229,6 @@ views.add_url_rule('/login', view_func=LoginView.as_view('login'),methods=['GET'
 views.add_url_rule('/discover', view_func=DiscoverPeopleView.as_view('discover'), methods=['GET','POST'])
 views.add_url_rule('/<uid>', view_func=ProfileView.as_view('profile'), methods=['GET','POST'])
 views.add_url_rule('/share', view_func=SharePhotoView.as_view('share'), methods=['GET','POST'])
+views.add_url_rule('/<uid>/followers', view_func=FollowersView.as_view('followers'), methods=['GET','POST'])
+views.add_url_rule('/<uid>/following', view_func=FollowingView.as_view('following'), methods=['GET','POST'])
 views.add_url_rule('/logout',view_func=LogoutView.as_view('logout'))

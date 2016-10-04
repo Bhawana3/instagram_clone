@@ -1,0 +1,8 @@
+{% if followers %}
+    {% for follower in followers %}
+        <div>{{ follower.profile_pic }}</div>
+        <div>{{ follower.username }}</div>
+    {% endfor %}
+{% else %}
+    <div>You have no followers.</div>
+{% endif %}
